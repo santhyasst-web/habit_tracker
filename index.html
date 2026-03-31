@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thrive10X — Where The Future Answers</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo-wrap">
+        <svg class="logo-icon" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="2" y="22" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="#C8102E">THRIVE</text>
+          <text x="2" y="40" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#C8102E">10</text>
+          <text x="28" y="40" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#A00020">X</text>
+          <path d="M46 8 C52 6, 58 12, 56 18 L38 42 L34 38 Z" fill="#C8102E"/>
+          <path d="M34 38 L30 54 L38 42 Z" fill="#8B0000" opacity="0.6"/>
+          <circle cx="49" cy="15" r="2.5" fill="white" opacity="0.9"/>
+        </svg>
+        <span class="logo-text">Thrive<strong>10X</strong></span>
+      </a>
+      <div class="nav-tagline">WHERE THE FUTURE ANSWERS</div>
+      <ul class="nav-links">
+        <li><a href="#how-tia-works">Features</a></li>
+        <li><a href="#benefits">Benefits</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#founding">Contact</a></li>
+      </ul>
+      <a href="mailto:info@thrive10x.ca" class="nav-email">info@thrive10x.ca</a>
+      <a href="tel:2897757305" class="btn btn-primary nav-cta">Claim Your Spot</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content container hero-split">
+      <div class="founding-badge reveal">
+        <span class="dot-live"></span>
+        FOUNDING PARTNER PROPOSAL · 2026
+      </div>
+      <h1 class="hero-title reveal">
+        Every call answered.<br />
+        <em>Every dollar earned.</em>
+      </h1>
+      <p class="hero-desc reveal">
+        <strong>TIA</strong> is Thrive10X's 24/7 Call Concierge — she answers, books, and follows up
+        so your business captures every caller before they try a competitor.
+      </p>
+      <p class="hero-tagline reveal">Answer every call. Win every customer.</p>
+      <div class="hero-cta-block reveal">
+        <div class="hear-tia-card">
+          <div class="hear-label">HEAR TIA RIGHT NOW</div>
+          <div class="hear-sub">Call and <strong>experience her yourself</strong></div>
+          <a href="tel:3656039678" class="phone-number">(365) 603-9678</a>
+          <div class="hear-status"><span class="dot-live"></span> LIVE · 24 HRS · NO WAIT</div>
+        </div>
+        <div class="hero-cta-right">
+          <a href="tel:2897757305" class="btn btn-primary btn-xl pulse">Claim Your Founding Spot</a>
+          <span class="spots-left">&#9888; Only 3 spots available</span>
+          <a href="#how-tia-works" class="btn btn-ghost btn-lg">See How TIA Works ↓</a>
+        </div>
+      </div>
+      <div class="hero-spacer"></div>
+    </div>
+    <div class="tia-label">TIA · Your AI Receptionist</div>
+    <div class="hero-scroll-hint">scroll ↓</div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <section class="stats-strip" id="stats">
+    <div class="container stats-grid">
+      <div class="stat-item reveal" style="--delay:0s">
+        <div class="stat-num" data-target="62" data-suffix="%">0%</div>
+        <div class="stat-desc">of small business<br />calls go unanswered</div>
+        <div class="stat-source">411 Locals, 85-business study</div>
+      </div>
+      <div class="stat-item reveal" style="--delay:0.1s">
+        <div class="stat-num" data-target="85" data-suffix="%">0%</div>
+        <div class="stat-desc">of missed callers<br />call a competitor next</div>
+        <div class="stat-source">DialZara, 2025</div>
+      </div>
+      <div class="stat-item reveal" style="--delay:0.2s">
+        <div class="stat-num" data-prefix="$" data-target="126" data-suffix="K">$0K</div>
+        <div class="stat-desc">avg. annual revenue<br />lost to missed calls</div>
+        <div class="stat-source">Industry avg., multiple sources</div>
+      </div>
+      <div class="stat-item reveal" style="--delay:0.3s">
+        <div class="stat-num" data-target="78" data-suffix="%">0%</div>
+        <div class="stat-desc">of customers choose<br />whoever responds first</div>
+        <div class="stat-source">RingEden, 2025</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL WORKFLOW -->
+  <section class="workflow section" id="workflow">
+    <div class="container">
+      <div class="section-eyebrow reveal">How It Works</div>
+      <h2 class="section-title reveal">From missed call to <span class="text-red">booked client</span><br />in seconds — automatically.</h2>
+      <div class="workflow-steps reveal">
+        <div class="wf-step">
+          <div class="wf-icon">📲</div>
+          <div class="wf-num">01</div>
+          <h3>Call Received</h3>
+          <p>A potential client calls your business number — any time of day or night.</p>
+        </div>
+        <div class="wf-arrow">
+          <div class="wf-arrow-line"></div>
+          <div class="wf-arrow-head">→</div>
+        </div>
+        <div class="wf-step wf-step--tia">
+          <div class="wf-tia-glow"></div>
+          <div class="wf-icon">🤖</div>
+          <div class="wf-num">02</div>
+          <h3>TIA Answers</h3>
+          <p>TIA picks up instantly, speaks naturally, answers questions, checks availability, and locks in the booking.</p>
+          <div class="wf-tia-badge">AI · LIVE · 24/7</div>
+        </div>
+        <div class="wf-arrow">
+          <div class="wf-arrow-line"></div>
+          <div class="wf-arrow-head">→</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-icon">✅</div>
+          <div class="wf-num">03</div>
+          <h3>Client Confirmed</h3>
+          <p>Booking synced, follow-up sent, call logged. You focus on the work — TIA handles the rest.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TIA WORKS -->
+  <section class="how-tia section" id="how-tia-works">
+    <div class="container">
+      <div class="section-eyebrow reveal">Features</div>
+      <h2 class="section-title reveal">Three ways TIA grows<br /><span class="text-red">your business, daily.</span></h2>
+      <div class="tia-steps">
+
+        <div class="tia-card reveal-3d" style="--delay:0s">
+          <div class="card-3d-inner">
+            <div class="card-front">
+              <div class="step-num-big">01</div>
+              <div class="step-icon-3d">
+                <div class="icon-3d-wrap phone-3d">
+                  <div class="icon-face front"></div>
+                  <div class="icon-face back"></div>
+                  <div class="icon-face left"></div>
+                  <div class="icon-face right"></div>
+                  <div class="icon-face top"></div>
+                  <div class="icon-face bottom"></div>
+                </div>
+              </div>
+              <h3>Answers &amp; Books Every Call</h3>
+              <p>TIA picks up instantly — days, nights, weekends. Checks availability, answers questions, and locks in the booking before they try someone else.</p>
+              <div class="step-tags">
+                <span>HIGHER CONVERSIONS</span>
+                <span>FEWER NO-SHOWS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tia-card reveal-3d" style="--delay:0.15s">
+          <div class="card-3d-inner">
+            <div class="card-front">
+              <div class="step-num-big">02</div>
+              <div class="step-icon-3d">
+                <div class="icon-3d-wrap calendar-3d">
+                  <div class="icon-face front"></div>
+                  <div class="icon-face back"></div>
+                  <div class="icon-face left"></div>
+                  <div class="icon-face right"></div>
+                  <div class="icon-face top"></div>
+                  <div class="icon-face bottom"></div>
+                </div>
+              </div>
+              <h3>Handles Rescheduling &amp; FAQs</h3>
+              <p>Cancellations, rescheduling, directions, pricing — TIA handles the repetitive calls so your team focuses on the work that needs them.</p>
+              <div class="step-tags">
+                <span>LESS ADMIN</span>
+                <span>MORE BILLABLE TIME</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tia-card reveal-3d" style="--delay:0.3s">
+          <div class="card-3d-inner">
+            <div class="card-front">
+              <div class="step-num-big">03</div>
+              <div class="step-icon-3d">
+                <div class="icon-3d-wrap clipboard-3d">
+                  <div class="icon-face front"></div>
+                  <div class="icon-face back"></div>
+                  <div class="icon-face left"></div>
+                  <div class="icon-face right"></div>
+                  <div class="icon-face top"></div>
+                  <div class="icon-face bottom"></div>
+                </div>
+              </div>
+              <h3>Tracks Calls &amp; Follows Up</h3>
+              <p>Every call logged, synced, and followed up automatically. No lead goes cold. No customer feels ignored.</p>
+              <div class="step-tags">
+                <span>SMARTER DECISIONS</span>
+                <span>BETTER RETENTION</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MEET TIA -->
+  <section class="meet-tia section" id="meet-tia">
+    <div class="container meet-tia-inner">
+      <div class="meet-tia-text reveal">
+        <div class="section-eyebrow">Meet TIA</div>
+        <h2>She talks like a human.<br /><em>She works like a machine.</em></h2>
+        <blockquote class="tia-quote">
+          "I talk to your callers like a human, book appointments in seconds, and never roll my eyes!!!"
+          <cite>— TIA, your AI receptionist</cite>
+        </blockquote>
+        <p>TIA is built to handle real conversations — she answers questions, navigates tricky requests, handles unhappy callers with grace, and always ends the call with a booking or a plan. She's been trained on thousands of service-industry calls and knows exactly what your customers need to hear.</p>
+        <p class="meet-tia-sub">Turning chaos into calm — one phone call at a time.</p>
+        <a href="tel:3656039678" class="btn btn-primary btn-lg">Call TIA Right Now</a>
+      </div>
+      <div class="meet-tia-visual reveal">
+        <div class="tia-phone-card">
+          <div class="tpc-header">
+            <div class="tpc-avatar">TIA</div>
+            <div class="tpc-info">
+              <span class="tpc-name">TIA — Thrive10X</span>
+              <span class="tpc-status"><span class="dot-live"></span> Live · Always on</span>
+            </div>
+          </div>
+          <div class="tpc-messages">
+            <div class="tpc-msg tpc-tia">Hi! Thanks for calling. This is TIA — how can I help you today?</div>
+            <div class="tpc-msg tpc-caller">Hi, I need to book a plumber for tomorrow morning.</div>
+            <div class="tpc-msg tpc-tia">Of course! I have 9 AM and 11 AM available tomorrow. Which works better for you?</div>
+            <div class="tpc-msg tpc-caller">9 AM please.</div>
+            <div class="tpc-msg tpc-tia">Perfect! I've got you booked for 9 AM tomorrow. Can I get your name and best callback number?</div>
+          </div>
+          <div class="tpc-footer">
+            <div class="tpc-wave">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span class="tpc-note">Real conversation · No scripts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILT FOR -->
+  <section class="built-for section" id="industries">
+    <div class="container">
+      <div class="section-eyebrow reveal">Built For</div>
+      <h2 class="section-title reveal">Serving the trades &amp;<br /><span class="text-red">service businesses</span> that keep the world running.</h2>
+      <div class="industries reveal">
+        <div class="industry-item">🔧<span>Plumbers</span></div>
+        <div class="industry-item">❄️<span>HVAC</span></div>
+        <div class="industry-item">⚡<span>Electricians</span></div>
+        <div class="industry-item">💇<span>Salons</span></div>
+        <div class="industry-item">💅<span>Nail Parlours</span></div>
+        <div class="industry-item">🐾<span>Pet Clinics</span></div>
+        <div class="industry-item">🦴<span>Chiropractic</span></div>
+        <div class="industry-item">💆<span>Massage Therapy</span></div>
+        <div class="industry-item">🏃<span>Physiotherapy</span></div>
+        <div class="industry-item">🌿<span>Wellness Centres</span></div>
+      </div>
+
+      <!-- 3D rotating cube showcase -->
+      <div class="cube-showcase reveal">
+        <div class="scene">
+          <div class="cube" id="rotating-cube">
+            <div class="cube-face cube-front">
+              <div class="cube-stat">62%</div>
+              <div class="cube-label">Calls Missed<br/>Without TIA</div>
+            </div>
+            <div class="cube-face cube-back">
+              <div class="cube-stat">24/7</div>
+              <div class="cube-label">Always<br/>Available</div>
+            </div>
+            <div class="cube-face cube-left">
+              <div class="cube-stat">$126K</div>
+              <div class="cube-label">Revenue<br/>Recovered</div>
+            </div>
+            <div class="cube-face cube-right">
+              <div class="cube-stat">85%</div>
+              <div class="cube-label">Stay, Not<br/>Compete</div>
+            </div>
+            <div class="cube-face cube-top">
+              <div class="cube-stat">3 Spots</div>
+              <div class="cube-label">Founding<br/>Partners</div>
+            </div>
+            <div class="cube-face cube-bottom">
+              <div class="cube-stat">0 Risk</div>
+              <div class="cube-label">30-Day<br/>Free Pilot</div>
+            </div>
+          </div>
+        </div>
+        <div class="cube-caption">
+          <h3>TIA by the numbers</h3>
+          <p>Real results for real businesses</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="benefits section" id="benefits">
+    <div class="container">
+      <div class="section-eyebrow reveal">Benefits</div>
+      <h2 class="section-title reveal">Everything your front desk<br /><span class="text-red">should be doing</span> — but isn't.</h2>
+      <div class="benefits-grid">
+        <div class="benefit-card reveal-3d" style="--delay:0s">
+          <div class="bc-icon">📈</div>
+          <h3>Revenue Boost</h3>
+          <p>Every answered call is a potential booking. TIA converts callers into clients 24/7, capturing revenue you'd otherwise lose to voicemail.</p>
+        </div>
+        <div class="benefit-card reveal-3d" style="--delay:0.08s">
+          <div class="bc-icon">🔍</div>
+          <h3>Caller Insights</h3>
+          <p>Real-time metrics, monthly analytics, and booking trends give you a clear picture of what's working and where to grow.</p>
+        </div>
+        <div class="benefit-card reveal-3d" style="--delay:0.16s">
+          <div class="bc-icon">🏆</div>
+          <h3>Competitive Edge</h3>
+          <p>78% of customers choose whoever responds first. With TIA, you're always first — even at 2 AM on a Sunday.</p>
+        </div>
+        <div class="benefit-card reveal-3d" style="--delay:0.24s">
+          <div class="bc-icon">🔧</div>
+          <h3>Seamless Setup</h3>
+          <p>We configure TIA to your industry, your scripts, and your calendar. You'll be live within days — no tech skills required.</p>
+        </div>
+        <div class="benefit-card reveal-3d" style="--delay:0.32s">
+          <div class="bc-icon">📋</div>
+          <h3>Flexible Plans</h3>
+          <p>Start with our founding rate and lock it in for life. Scale up as your business grows. Cancel anytime — no contracts.</p>
+        </div>
+        <div class="benefit-card reveal-3d" style="--delay:0.4s">
+          <div class="bc-icon">🤝</div>
+          <h3>Dedicated Support</h3>
+          <p>You're not a ticket number. Founding partners get priority support and a direct line to our team whenever you need us.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTEGRATIONS -->
+  <section class="integrations section" id="integrations">
+    <div class="container">
+      <div class="section-eyebrow reveal">Integrations</div>
+      <h2 class="section-title reveal">Plugs into the tools<br /><span class="text-red">you already use.</span></h2>
+      <p class="integrations-sub reveal">TIA connects with your existing calendar, CRM, and communication stack — no rip-and-replace required.</p>
+      <div class="integrations-grid reveal">
+        <div class="integration-card">
+          <div class="int-icon">📅</div>
+          <div class="int-name">Calendar Sync</div>
+          <div class="int-desc">Books directly into your Google, Outlook, or practice calendar in real time.</div>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon">🗂️</div>
+          <div class="int-name">Airtable</div>
+          <div class="int-desc">Every call and booking logged automatically to your Airtable base for easy tracking.</div>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon">⚙️</div>
+          <div class="int-name">Make (Integromat)</div>
+          <div class="int-desc">Trigger custom automations when TIA books, cancels, or flags a call — connect anything.</div>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon">💬</div>
+          <div class="int-name">Twilio SMS</div>
+          <div class="int-desc">Automatic text reminders reduce no-shows and keep clients informed before their appointment.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDING PARTNER -->
+  <section class="founding section" id="founding">
+    <div class="container">
+      <div class="founding-eyebrow reveal">LIMITED TO 3 BUSINESSES ONLY — FOUNDING PARTNER OFFER</div>
+      <h2 class="founding-title reveal">Be first. <em>Benefit most.</em></h2>
+
+      <div class="founding-grid">
+        <div class="founding-benefit reveal-3d" style="--delay:0s">
+          <div class="benefit-check">✓</div>
+          <p>30-day free pilot. Zero risk.</p>
+        </div>
+        <div class="founding-benefit reveal-3d" style="--delay:0.08s">
+          <div class="benefit-check">✓</div>
+          <p>Founding price locked for life.</p>
+        </div>
+        <div class="founding-benefit reveal-3d" style="--delay:0.16s">
+          <div class="benefit-check">✓</div>
+          <p>Priority support. Always first in line.</p>
+        </div>
+        <div class="founding-benefit reveal-3d" style="--delay:0.24s">
+          <div class="benefit-check">✓</div>
+          <p>Custom call script for your industry.</p>
+        </div>
+        <div class="founding-benefit reveal-3d" style="--delay:0.32s">
+          <div class="benefit-check">✓</div>
+          <p>Monthly performance reports included.</p>
+        </div>
+        <div class="founding-benefit reveal-3d" style="--delay:0.4s">
+          <div class="benefit-check">✓</div>
+          <p>Cancel anytime. No contracts.</p>
+        </div>
+      </div>
+
+      <div class="founding-cta reveal">
+        <div class="spots-counter">
+          <div class="spots-visual">
+            <div class="spot taken"></div>
+            <div class="spot taken"></div>
+            <div class="spot available pulse-spot"></div>
+          </div>
+          <span>ONLY 3 SPOTS AVAILABLE — 2 TAKEN</span>
+        </div>
+        <div class="founding-claim">
+          <h3>Claim your founding spot</h3>
+          <a href="tel:2897757305" class="phone-number-lg">(289) 775-7305</a>
+          <p class="call-note">CALL US · WE'LL GET YOU STARTED</p>
+          <a href="tel:2897757305" class="btn btn-primary btn-xl pulse">Call Now to Claim</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HEAR TIA DEMO -->
+  <section class="demo-section section">
+    <div class="container demo-inner">
+      <div class="demo-text reveal">
+        <div class="section-eyebrow light">HEAR TIA RIGHT NOW</div>
+        <h2>Call and<br /><em>experience her yourself</em></h2>
+        <p>Pick up your phone and call TIA. She's live 24 hours, no wait, no scripts — a real conversation with your future AI receptionist.</p>
+        <a href="tel:3656039678" class="phone-number-demo">(365) 603-9678</a>
+        <div class="demo-status"><span class="dot-live"></span> LIVE · 24 HRS · NO WAIT</div>
+      </div>
+      <div class="demo-visual reveal">
+        <div class="demo-phone">
+          <div class="demo-phone-screen">
+            <div class="demo-incoming">
+              <div class="demo-avatar">TIA</div>
+              <div class="demo-info">
+                <span class="demo-name">TIA — Thrive10X</span>
+                <span class="demo-calling typing-dots">calling<span>.</span><span>.</span><span>.</span></span>
+              </div>
+            </div>
+            <div class="demo-wave">
+              <div class="wave-bar" style="--h:30%"></div>
+              <div class="wave-bar" style="--h:60%"></div>
+              <div class="wave-bar" style="--h:45%"></div>
+              <div class="wave-bar" style="--h:80%"></div>
+              <div class="wave-bar" style="--h:55%"></div>
+              <div class="wave-bar" style="--h:70%"></div>
+              <div class="wave-bar" style="--h:40%"></div>
+              <div class="wave-bar" style="--h:65%"></div>
+              <div class="wave-bar" style="--h:35%"></div>
+            </div>
+            <div class="demo-transcript">
+              <div class="t-line tia">"Thank you for calling. This is TIA — how can I help you today?"</div>
+              <div class="t-line caller">"Hi, I need a plumber tomorrow morning."</div>
+              <div class="t-line tia">"I can book you for 9 AM tomorrow. May I get your name?"</div>
+            </div>
+            <a href="tel:3656039678" class="demo-call-btn">
+              <span>📞</span> Call TIA Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq section" id="faq">
+    <div class="container">
+      <div class="section-eyebrow reveal">FAQ</div>
+      <h2 class="section-title reveal">Common questions,<br /><span class="text-red">straight answers.</span></h2>
+      <div class="faq-list reveal">
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What exactly does TIA do?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>TIA is a 24/7 AI voice receptionist. She answers your business phone calls, checks your calendar, books appointments, handles rescheduling and cancellations, answers common questions (pricing, directions, hours), logs every call, and sends follow-ups — all automatically, all day, every day.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Does TIA sound like a real person?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. TIA is trained to speak naturally — she handles pauses, follow-up questions, and real conversation flow. Most callers have no idea they're speaking to an AI. You can call (365) 603-9678 right now to hear her yourself.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Can TIA be customized for my business?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Absolutely. Founding partners get a fully custom call script written for their specific industry and business. We tune TIA to your services, pricing, availability windows, and the way you like to communicate with clients.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What if a caller needs to speak to a real human?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>TIA knows when to escalate. If a caller requests a human, or if the situation requires it, TIA can take a message, flag the call for urgent follow-up, or transfer directly — depending on how you configure it.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Can I pause or turn TIA off?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. You're always in control. You can pause TIA, adjust her schedule, or update her scripts at any time. There's no contract and no lock-in — if it's not working for you, you can cancel.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            How quickly can I get started?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Most businesses are live within a few business days. We handle the setup, the scripting, and the integration. You call us, we take care of everything else. Your 30-day free pilot starts the moment TIA goes live.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="footer-logo">
+          <svg class="logo-icon" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="2" y="22" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="#C8102E">THRIVE</text>
+            <text x="2" y="40" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#C8102E">10</text>
+            <text x="28" y="40" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#A00020">X</text>
+            <path d="M46 8 C52 6, 58 12, 56 18 L38 42 L34 38 Z" fill="#C8102E"/>
+            <path d="M34 38 L30 54 L38 42 Z" fill="#8B0000" opacity="0.6"/>
+            <circle cx="49" cy="15" r="2.5" fill="white" opacity="0.9"/>
+          </svg>
+          <div>
+            <span class="footer-brand">Thrive10X</span>
+            <span class="footer-tagline-sm">WHERE THE FUTURE ANSWERS</span>
+          </div>
+        </div>
+        <p class="footer-copy">© 2026 Thrive10X. All rights reserved.</p>
+      </div>
+
+      <div class="footer-links-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#how-tia-works">Features</a></li>
+          <li><a href="#benefits">Benefits</a></li>
+          <li><a href="#industries">Industries</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#founding">Founding Offer</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact-col">
+        <h4>Contact Us</h4>
+        <a href="mailto:info@thrive10x.ca" class="footer-email">info@thrive10x.ca</a>
+        <a href="tel:2897757305" class="footer-phone">(289) 775-7305</a>
+        <a href="tel:3656039678" class="footer-phone footer-phone--tia">
+          <span class="dot-live"></span>(365) 603-9678 · Call TIA
+        </a>
+        <div class="footer-social">
+          <a href="#" class="social-link" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="X / Twitter">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
