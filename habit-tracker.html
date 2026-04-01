@@ -641,6 +641,7 @@ const MONTH_NAMES = ['January','February','March','April','May','June','July','A
 
 let currentYear, currentMonth; // 0-indexed month
 let activeTab = 'today';
+let selectedDayStr = null; // null = today
 let activeWeekIndex = 0; // for weekly tab
 let selectedColor = COLORS[0];
 let weeklyCharts = {};
@@ -741,12 +742,29 @@ function setupNav() {
     currentMonth--;
     if (currentMonth < 0) { currentMonth = 11; currentYear--; }
     renderMonthLabel();
+    if (activeTab === 'today') {
+      // Jump selected day to last day of new month (or today if same month)
+      const now = new Date();
+      if (currentYear === now.getFullYear() && currentMonth === now.getMonth()) {
+        selectedDayStr = today();
+      } else {
+        selectedDayStr = toDateStr(new Date(currentYear, currentMonth + 1, 0));
+      }
+    }
     renderTab(activeTab);
   });
   document.getElementById('nextMonth').addEventListener('click', () => {
     currentMonth++;
     if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     renderMonthLabel();
+    if (activeTab === 'today') {
+      const now = new Date();
+      if (currentYear === now.getFullYear() && currentMonth === now.getMonth()) {
+        selectedDayStr = today();
+      } else {
+        selectedDayStr = toDateStr(new Date(currentYear, currentMonth, 1));
+      }
+    }
     renderTab(activeTab);
   });
 }
@@ -768,28 +786,32 @@ function renderTab(tab) {
 function renderToday() {
   const container = document.getElementById('tab-today');
   const habits = getHabits();
-  const data = getMonthData(currentYear, currentMonth);
-  const todayStr = today();
-  const dayData = data.days[todayStr] || {};
 
-  // Is today in current viewed month?
-  const now = new Date();
-  const isCurrentMonth = now.getFullYear() === currentYear && now.getMonth() === currentMonth;
+  // Resolve which day we're viewing
+  const todayReal = today();
+  if (!selectedDayStr) selectedDayStr = todayReal;
 
-  // Date banner
-  const d = isCurrentMonth ? now : new Date(currentYear, currentMonth, 1);
-  const displayDate = isCurrentMonth ? now : null;
-  const dayName = displayDate ? DAY_NAMES[displayDate.getDay()] : '';
-  const fullDate = displayDate
-    ? `${displayDate.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}`
-    : `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+  // Parse selected day to get year/month for data lookup
+  const [selY, selM, selD] = selectedDayStr.split('-').map(Number);
+  const selMonth = selM - 1;
+  const data = getMonthData(selY, selMonth);
+  const dayData = data.days[selectedDayStr] || {};
+  const isToday = selectedDayStr === todayReal;
 
-  // Week info
-  const weeks = getWeeksOfMonth(currentYear, currentMonth);
-  const weekIdx = getCurrentWeekIndex(currentYear, currentMonth, weeks);
-  const foodCount = countWeekHabitDone(data, weeks[weekIdx]?.days || [], 'food');
+  // Display date
+  const displayDate = new Date(selY, selMonth, selD);
+  const dayName = DAY_NAMES[displayDate.getDay()];
+  const fullDate = displayDate.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+
+  // Week info for the selected day's month
+  const weeks = getWeeksOfMonth(selY, selMonth);
+  let weekIdx = 0;
+  for (let i = 0; i < weeks.length; i++) {
+    if (weeks[i].days.some(d => toDateStr(d) === selectedDayStr)) { weekIdx = i; break; }
+  }
   const foodHabit = habits.find(h => h.id === 'food');
   const foodLimit = foodHabit ? foodHabit.weeklyTarget : 2;
+  const foodCount = countWeekHabitDone(data, weeks[weekIdx]?.days || [], 'food');
 
   // Done count
   const trackableHabits = habits.filter(h => !h.isLimit);
@@ -797,18 +819,31 @@ function renderToday() {
   const totalTrackable = trackableHabits.length;
   const pct = totalTrackable > 0 ? Math.round(doneToday / totalTrackable * 100) : 0;
 
+  // Prev/next day
+  const prevDay = new Date(selY, selMonth, selD - 1);
+  const nextDay = new Date(selY, selMonth, selD + 1);
+  const nextDayStr = toDateStr(nextDay);
+  const canGoNext = nextDayStr <= todayReal;
+
   let html = '';
 
-  // Date banner
-  html += `<div class="date-banner">
-    <div class="day-name">${dayName || MONTH_NAMES[currentMonth]}</div>
-    <div class="full-date">${fullDate}</div>
+  // Date banner with day nav
+  html += `<div class="date-banner" style="padding-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <button onclick="changeDay(-1)" style="background:#ffffff18;border:none;color:#a5b4fc;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:18px;">‹</button>
+      <div style="text-align:center;">
+        <div class="day-name">${dayName}${isToday ? ' · Today' : ''}</div>
+        <div class="full-date">${fullDate}</div>
+      </div>
+      <button onclick="changeDay(1)" ${canGoNext ? '' : 'disabled'} style="background:#ffffff18;border:none;color:${canGoNext ? '#a5b4fc' : '#3a3a5a'};width:36px;height:36px;border-radius:10px;cursor:${canGoNext ? 'pointer' : 'default'};font-size:18px;">›</button>
+    </div>
     <div class="week-info">Week ${weekIdx + 1} of ${weeks.length}</div>
+    ${!isToday ? `<div style="margin-top:6px;"><button onclick="goToToday()" style="background:#7c3aed33;border:1px solid #7c3aed55;color:#a5b4fc;padding:4px 12px;border-radius:99px;font-size:12px;cursor:pointer;">↩ Go to Today</button></div>` : ''}
   </div>`;
 
   // Progress
   html += `<div class="today-progress">
-    <div class="prog-row"><span>Today's Progress</span><span>${doneToday}/${totalTrackable} habits &mdash; ${pct}%</span></div>
+    <div class="prog-row"><span>${isToday ? "Today's" : "Day's"} Progress</span><span>${doneToday}/${totalTrackable} habits &mdash; ${pct}%</span></div>
     <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
   </div>`;
 
@@ -823,7 +858,6 @@ function renderToday() {
   html += `<div class="section-label">Habits</div>`;
   habits.filter(h => !h.isLimit).forEach(habit => {
     const done = !!dayData[habit.id];
-    // weekly count for sub-label
     const wDays = weeks[weekIdx]?.days || [];
     const weekDone = countWeekHabitDone(data, wDays, habit.id);
     const weekTarget = habit.weeklyTarget;
@@ -857,34 +891,57 @@ function renderToday() {
   html += `<div class="weight-card">
     <div class="weight-icon">⚖️</div>
     <div class="weight-info">
-      <div style="font-size:15px;font-weight:600;">Today's Weight</div>
+      <div style="font-size:15px;font-weight:600;">Weight</div>
       <div class="weight-label">kg</div>
     </div>
-    <input type="number" step="0.1" id="weightInput" value="${data.weights[todayStr] || ''}" placeholder="—" onchange="saveWeight(this.value)">
+    <input type="number" step="0.1" id="weightInput" value="${data.weights[selectedDayStr] || ''}" placeholder="—" onchange="saveWeight(this.value)">
   </div>`;
 
   container.innerHTML = html;
 }
 
 function toggleHabit(id) {
-  const data = getMonthData(currentYear, currentMonth);
-  const todayStr = today();
-  if (!data.days[todayStr]) data.days[todayStr] = {};
-  data.days[todayStr][id] = !data.days[todayStr][id];
-  saveMonthData(currentYear, currentMonth, data);
+  const [y, m] = selectedDayStr.split('-').map(Number);
+  const data = getMonthData(y, m - 1);
+  if (!data.days[selectedDayStr]) data.days[selectedDayStr] = {};
+  data.days[selectedDayStr][id] = !data.days[selectedDayStr][id];
+  saveMonthData(y, m - 1, data);
   renderToday();
 }
 
 function saveWeight(val) {
-  const data = getMonthData(currentYear, currentMonth);
-  const todayStr = today();
+  const [y, m] = selectedDayStr.split('-').map(Number);
+  const data = getMonthData(y, m - 1);
   const num = parseFloat(val);
   if (!isNaN(num) && num > 0) {
-    data.weights[todayStr] = num;
+    data.weights[selectedDayStr] = num;
   } else {
-    delete data.weights[todayStr];
+    delete data.weights[selectedDayStr];
   }
-  saveMonthData(currentYear, currentMonth, data);
+  saveMonthData(y, m - 1, data);
+}
+
+function changeDay(dir) {
+  if (!selectedDayStr) selectedDayStr = today();
+  const [y, m, d] = selectedDayStr.split('-').map(Number);
+  const next = new Date(y, m - 1, d + dir);
+  const nextStr = toDateStr(next);
+  if (nextStr > today()) return; // can't go to future
+  selectedDayStr = nextStr;
+  // sync month nav to selected day's month
+  currentYear = next.getFullYear();
+  currentMonth = next.getMonth();
+  renderMonthLabel();
+  renderToday();
+}
+
+function goToToday() {
+  selectedDayStr = today();
+  const now = new Date();
+  currentYear = now.getFullYear();
+  currentMonth = now.getMonth();
+  renderMonthLabel();
+  renderToday();
 }
 
 function countWeekHabitDone(data, wDays, habitId) {
