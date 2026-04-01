@@ -390,12 +390,16 @@
     background: var(--surface);
     border-radius: 16px;
     border: 1.5px solid var(--border);
-    overflow: hidden;
+    overflow-x: auto;
     margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .goals-table-inner {
+    min-width: 480px;
   }
   .goals-table-header {
     display: grid;
-    grid-template-columns: 1fr 60px 60px 44px 44px 44px 44px;
+    grid-template-columns: 130px 56px 56px 40px 40px 40px 40px 40px;
     background: var(--surface2);
     border-bottom: 1px solid var(--border);
     padding: 8px 12px;
@@ -408,7 +412,7 @@
   }
   .goals-table-row {
     display: grid;
-    grid-template-columns: 1fr 60px 60px 44px 44px 44px 44px;
+    grid-template-columns: 130px 56px 56px 40px 40px 40px 40px 40px;
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
     align-items: center;
@@ -421,6 +425,9 @@
     align-items: center;
     gap: 6px;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .goals-table-row .num-cell {
     text-align: center;
@@ -631,6 +638,7 @@ const DEFAULT_HABITS = [
   { id: 'walk',    name: 'Walk 40 Min',      icon: '🚶', color: '#3b82f6', weeklyTarget: 3, isLimit: false },
   { id: 'food',    name: 'Outside Food',     icon: '🍔', color: '#ef4444', weeklyTarget: 2, isLimit: true  },
   { id: 'sugar',   name: 'No Sugar',         icon: '🍬', color: '#22c55e', weeklyTarget: 6, isLimit: false },
+  { id: 'sugarday', name: 'Sugar Day',       icon: '🍰', color: '#f59e0b', weeklyTarget: 1, isLimit: true  },
   { id: 'read',    name: 'Read',             icon: '📖', color: '#eab308', weeklyTarget: 0, isLimit: false },
   { id: 'imf',     name: 'Intermittent Fast',icon: '⏳', color: '#06b6d4', weeklyTarget: 0, isLimit: false },
 ];
@@ -812,6 +820,9 @@ function renderToday() {
   const foodHabit = habits.find(h => h.id === 'food');
   const foodLimit = foodHabit ? foodHabit.weeklyTarget : 2;
   const foodCount = countWeekHabitDone(data, weeks[weekIdx]?.days || [], 'food');
+  const sugarDayHabit = habits.find(h => h.id === 'sugarday');
+  const sugarDayLimit = sugarDayHabit ? sugarDayHabit.weeklyTarget : 1;
+  const sugarDayCount = countWeekHabitDone(data, weeks[weekIdx]?.days || [], 'sugarday');
 
   // Done count
   const trackableHabits = habits.filter(h => !h.isLimit);
@@ -847,11 +858,14 @@ function renderToday() {
     <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
   </div>`;
 
-  // Food warning
+  // Warnings
   if (foodCount >= foodLimit && foodLimit > 0) {
     html += `<div class="food-warning">⚠️ Outside food limit reached this week! (${foodCount}/${foodLimit} days)</div>`;
   } else if (foodCount === foodLimit - 1 && foodLimit > 0) {
     html += `<div class="food-warning" style="background:linear-gradient(135deg,#78350f,#92400e);border-color:#f97316;">⚡ 1 outside food day left this week (${foodCount}/${foodLimit})</div>`;
+  }
+  if (sugarDayCount >= sugarDayLimit && sugarDayLimit > 0) {
+    html += `<div class="food-warning" style="background:linear-gradient(135deg,#713f12,#854d0e);border-color:#f59e0b;">⚠️ Sugar day limit reached this week! (${sugarDayCount}/${sugarDayLimit} day)</div>`;
   }
 
   // Habits
@@ -872,15 +886,26 @@ function renderToday() {
     </div>`;
   });
 
-  // Outside food (cheat tracker)
+  // Cheat tracker section
+  html += `<div class="section-label">Cheat Tracker</div>`;
   if (foodHabit) {
     const flagged = !!dayData['food'];
-    html += `<div class="section-label">Cheat Tracker</div>`;
     html += `<div class="habit-card ${flagged ? 'flagged' : ''}" style="--habit-color:${foodHabit.color}" data-id="food" onclick="toggleHabit('food')">
       <div class="habit-icon">🍔</div>
       <div class="habit-info">
         <div class="habit-name">Outside Food</div>
         <div class="habit-sub">Tap to flag — limit ${foodLimit}/week, used ${foodCount} this week</div>
+      </div>
+      <div class="habit-check">${flagged ? '✓' : ''}</div>
+    </div>`;
+  }
+  if (sugarDayHabit) {
+    const flagged = !!dayData['sugarday'];
+    html += `<div class="habit-card ${flagged ? 'flagged' : ''}" style="--habit-color:${sugarDayHabit.color}" data-id="sugarday" onclick="toggleHabit('sugarday')">
+      <div class="habit-icon">🍰</div>
+      <div class="habit-info">
+        <div class="habit-name">Sugar Day</div>
+        <div class="habit-sub">Tap to flag — limit ${sugarDayLimit}/week, used ${sugarDayCount} this week</div>
       </div>
       <div class="habit-check">${flagged ? '✓' : ''}</div>
     </div>`;
@@ -1146,10 +1171,11 @@ function renderMonthly() {
   </div>`;
 
   // Goals table
-  html += `<div class="goals-table">
+  html += `<div class="goals-table"><div class="goals-table-inner">
     <div class="goals-table-header">
       <div>Habit</div><div>Target</div><div>Actual</div>
       ${weeks.map((_,i) => `<div>W${i+1}</div>`).join('')}
+      ${weeks.length < 5 ? Array(5 - weeks.length).fill('<div></div>').join('') : ''}
     </div>`;
 
   habits.forEach(h => {
@@ -1161,29 +1187,32 @@ function renderMonthly() {
       <div class="num-cell">${monthlyTarget ?? '—'}</div>
       <div class="num-cell ${overUnder}">${actual}</div>
       ${weekCounts.map(wc => `<div class="num-cell">${wc[h.id] || 0}</div>`).join('')}
+      ${weekCounts.length < 5 ? Array(5 - weekCounts.length).fill('<div class="num-cell"></div>').join('') : ''}
     </div>`;
   });
-  html += `</div>`;
+  html += `</div></div>`;
 
   // Cheat day log
   const cheatDays = [];
   for (let d = 1; d <= total; d++) {
     const ds = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const day = data.days[ds] || {};
-    if (day['food']) cheatDays.push({ ds, type: 'food', label: 'Outside Food' });
-    if (!day['sugar'] && habits.find(h => h.id === 'sugar')) {
-      // sugar days = days NOT clean (if sugar habit exists)
-    }
+    if (day['food']) cheatDays.push({ ds, type: 'food' });
+    if (day['sugarday']) cheatDays.push({ ds, type: 'sugar' });
   }
+  cheatDays.sort((a,b) => a.ds.localeCompare(b.ds));
+
   html += `<div class="cheat-log">
-    <h3>Outside Food Days</h3>
+    <h3>Cheat Days Log</h3>
     ${cheatDays.length === 0 ? '<div style="color:var(--text-muted);font-size:13px;">No cheat days logged 🎉</div>' : ''}
     ${cheatDays.map(cd => {
       const dateObj = new Date(cd.ds + 'T00:00:00');
-      return `<div class="cheat-day-item">
-        <span class="cheat-badge food">🍔 Outside Food</span>
-        <span>${dateObj.toLocaleDateString('en-US',{month:'short',day:'numeric',weekday:'short'})}</span>
-      </div>`;
+      const dateLabel = dateObj.toLocaleDateString('en-US',{month:'short',day:'numeric',weekday:'short'});
+      if (cd.type === 'food') {
+        return `<div class="cheat-day-item"><span class="cheat-badge food">🍔 Outside Food</span><span>${dateLabel}</span></div>`;
+      } else {
+        return `<div class="cheat-day-item"><span class="cheat-badge sugar">🍰 Sugar Day</span><span>${dateLabel}</span></div>`;
+      }
     }).join('')}
   </div>`;
 
