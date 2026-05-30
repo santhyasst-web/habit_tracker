@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Habit Tracker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     --bg: #0d0d1a;
@@ -36,6 +37,66 @@
     padding-bottom: 80px;
   }
 
+  /* ── AUTH OVERLAY ── */
+  #auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .auth-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .auth-box h2 { font-size: 22px; font-weight: 800; text-align: center; }
+  .auth-box p { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 4px; }
+  .auth-box input {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 15px;
+    padding: 12px 14px;
+    width: 100%;
+  }
+  .auth-box input:focus { outline: none; border-color: var(--accent); }
+  .auth-tab-row { display: flex; gap: 8px; }
+  .auth-tab {
+    flex: 1; padding: 8px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: none;
+    color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .auth-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .auth-msg { font-size: 13px; text-align: center; padding: 8px 12px; border-radius: 8px; display: none; }
+  .auth-msg.error { background: #7f1d1d44; color: #fca5a5; }
+  .auth-msg.success { background: #14532d44; color: #86efac; }
+
+  /* ── LOADING OVERLAY ── */
+  #loading-overlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 999;
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   /* ── HEADER ── */
   .header {
     background: var(--surface2);
@@ -65,6 +126,12 @@
     display: flex; align-items: center; justify-content: center;
   }
   .month-nav span { font-size: 14px; font-weight: 600; min-width: 100px; text-align: center; }
+  .signout-btn {
+    background: var(--border); border: none; color: var(--text-muted);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+    margin-left: 6px;
+  }
 
   /* ── BOTTOM NAV ── */
   .bottom-nav {
@@ -171,7 +238,6 @@
     border-color: var(--c-food);
   }
 
-  /* Outside food warning banner */
   .food-warning {
     background: linear-gradient(135deg, #7f1d1d, #991b1b);
     border: 1px solid #ef4444;
@@ -190,7 +256,6 @@
     50% { box-shadow: 0 0 0 6px #ef444400; }
   }
 
-  /* Weight card */
   .weight-card {
     background: var(--surface);
     border-radius: 14px;
@@ -223,7 +288,6 @@
   }
   .weight-card input:focus { outline: none; border-color: #06b6d4; }
 
-  /* Progress mini bar on Today */
   .today-progress {
     background: var(--surface);
     border-radius: 14px;
@@ -292,9 +356,7 @@
     border: 1.5px solid var(--border);
     text-align: center;
   }
-  .donut-card.full-width {
-    grid-column: 1 / -1;
-  }
+  .donut-card.full-width { grid-column: 1 / -1; }
   .donut-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
   .donut-card canvas { max-height: 160px; }
 
@@ -348,13 +410,8 @@
     border-radius: 50%;
     background: var(--border);
   }
-  .day-cell .dot.done {
-    background: var(--habit-color, var(--accent));
-  }
-  .day-cell .dot.future {
-    background: transparent;
-    border: 1.5px dashed var(--border);
-  }
+  .day-cell .dot.done { background: var(--habit-color, var(--accent)); }
+  .day-cell .dot.future { background: transparent; border: 1.5px dashed var(--border); }
 
   /* ── MONTHLY TAB ── */
   .monthly-cards {
@@ -394,9 +451,7 @@
     margin-bottom: 16px;
     -webkit-overflow-scrolling: touch;
   }
-  .goals-table-inner {
-    min-width: 480px;
-  }
+  .goals-table-inner { min-width: 480px; }
   .goals-table-header {
     display: grid;
     grid-template-columns: 130px 56px 56px 40px 40px 40px 40px 40px;
@@ -421,18 +476,10 @@
   }
   .goals-table-row:last-child { border-bottom: none; }
   .goals-table-row .habit-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 6px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .goals-table-row .num-cell {
-    text-align: center;
-    font-weight: 600;
-  }
+  .goals-table-row .num-cell { text-align: center; font-weight: 600; }
   .goals-table-row .num-cell.over { color: #22c55e; }
   .goals-table-row .num-cell.under { color: #ef4444; }
 
@@ -541,8 +588,8 @@
     transition: opacity 0.2s;
   }
   .btn-primary:active { opacity: 0.8; }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
 
-  /* Color swatches */
   .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
   .swatch {
     width: 28px; height: 28px;
@@ -553,7 +600,6 @@
   }
   .swatch.selected { border-color: #fff; }
 
-  /* Cheat day log */
   .cheat-log {
     background: var(--surface);
     border-radius: 14px;
@@ -580,7 +626,6 @@
   .cheat-badge.food { background: #7f1d1d; color: #fca5a5; }
   .cheat-badge.sugar { background: #713f12; color: #fde68a; }
 
-  /* Utility */
   .empty-state {
     text-align: center;
     color: var(--text-muted);
@@ -596,112 +641,303 @@
 </head>
 <body>
 
-<div class="header">
-  <h1>🔥 Habit Tracker</h1>
-  <div class="month-nav">
-    <button id="prevMonth">&#8592;</button>
-    <span id="monthLabel"></span>
-    <button id="nextMonth">&#8594;</button>
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div style="font-size:36px;text-align:center;">🔥</div>
+    <h2>Habit Tracker</h2>
+    <p>Sign in to sync your habits across devices</p>
+    <div class="auth-tab-row">
+      <button class="auth-tab active" id="tab-signin-btn" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-signup-btn" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <input type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+    <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+    <button class="btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Sign In</button>
+    <div class="auth-msg" id="auth-msg"></div>
   </div>
 </div>
 
-<!-- TAB CONTENT -->
-<div id="tab-today" class="tab active"></div>
-<div id="tab-weekly" class="tab"></div>
-<div id="tab-monthly" class="tab"></div>
-<div id="tab-settings" class="tab"></div>
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:var(--text-muted);">Loading your data…</div>
+</div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" data-tab="today">
-    <span class="icon">☀️</span>Today
-  </button>
-  <button class="nav-btn" data-tab="weekly">
-    <span class="icon">📊</span>Weekly
-  </button>
-  <button class="nav-btn" data-tab="monthly">
-    <span class="icon">📅</span>Monthly
-  </button>
-  <button class="nav-btn" data-tab="settings">
-    <span class="icon">⚙️</span>Settings
-  </button>
-</nav>
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <h1>🔥 Habit Tracker</h1>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="month-nav">
+        <button id="prevMonth">&#8592;</button>
+        <span id="monthLabel"></span>
+        <button id="nextMonth">&#8594;</button>
+      </div>
+      <button class="signout-btn" onclick="signOut()" title="Sign out">⏏</button>
+    </div>
+  </div>
+
+  <div id="tab-today" class="tab active"></div>
+  <div id="tab-weekly" class="tab"></div>
+  <div id="tab-monthly" class="tab"></div>
+  <div id="tab-settings" class="tab"></div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="today"><span class="icon">☀️</span>Today</button>
+    <button class="nav-btn" data-tab="weekly"><span class="icon">📊</span>Weekly</button>
+    <button class="nav-btn" data-tab="monthly"><span class="icon">📅</span>Monthly</button>
+    <button class="nav-btn" data-tab="settings"><span class="icon">⚙️</span>Settings</button>
+  </nav>
+</div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+//  SUPABASE
+// ═══════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://zfocebbkhyknjdtmqgdj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpmb2NlYmJraHlrbmpkdG1xZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwOTU1ODIsImV4cCI6MjA5NTY3MTU4Mn0.8rn6HEZB47WSuSkJSk7ZdnZNRgSKvykTqJdgBVWuXp0';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let habitsCache = null;
+let monthDataCache = {};
+
+// ═══════════════════════════════════════════════════════
+//  AUTH UI
+// ═══════════════════════════════════════════════════════
+let authMode = 'signin';
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-signin-btn').classList.toggle('active', mode === 'signin');
+  document.getElementById('tab-signup-btn').classList.toggle('active', mode === 'signup');
+  document.getElementById('authSubmitBtn').textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
+  document.getElementById('authPassword').placeholder = mode === 'signin' ? 'Password' : 'Create password';
+  clearAuthMsg();
+}
+
+async function handleAuthSubmit() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || !password) { showAuthMsg('Please enter your email and password.', 'error'); return; }
+
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '…';
+  clearAuthMsg();
+
+  let error;
+  if (authMode === 'signin') {
+    ({ error } = await sb.auth.signInWithPassword({ email, password }));
+  } else {
+    ({ error } = await sb.auth.signUp({ email, password }));
+    if (!error) {
+      showAuthMsg('Account created! Check your email to confirm, then sign in.', 'success');
+      btn.disabled = false;
+      btn.textContent = 'Sign Up';
+      return;
+    }
+  }
+
+  if (error) {
+    showAuthMsg(error.message, 'error');
+    btn.disabled = false;
+    btn.textContent = authMode === 'signin' ? 'Sign In' : 'Sign Up';
+  }
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+}
+
+function showAuthMsg(msg, type) {
+  const el = document.getElementById('auth-msg');
+  el.style.display = 'block';
+  el.className = `auth-msg ${type}`;
+  el.textContent = msg;
+}
+
+function clearAuthMsg() {
+  const el = document.getElementById('auth-msg');
+  el.style.display = 'none';
+}
+
+function showAuthOverlay() {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showLoading() {
+  document.getElementById('loading-overlay').style.display = 'flex';
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('auth-overlay').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+//  MIGRATION: localStorage → Supabase (first login only)
+// ═══════════════════════════════════════════════════════
+async function migrateFromLocalStorage() {
+  const { data: existing } = await sb.from('habits').select('id').limit(1);
+  if (existing && existing.length > 0) return;
+
+  const localHabitsRaw = localStorage.getItem('ht_habits');
+  const localHabits = localHabitsRaw
+    ? JSON.parse(localHabitsRaw)
+    : JSON.parse(JSON.stringify(DEFAULT_HABITS));
+
+  const habitRows = localHabits.map((h, i) => ({
+    id: h.id,
+    user_id: currentUser.id,
+    name: h.name,
+    icon: h.icon,
+    color: h.color,
+    weekly_target: h.weeklyTarget || 0,
+    is_limit: h.isLimit || false,
+    is_active: true,
+    sort_order: i,
+  }));
+  await sb.from('habits').upsert(habitRows, { onConflict: 'id,user_id' });
+  habitsCache = localHabits;
+
+  const logRows = [];
+  const weightRows = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const match = key && key.match(/^ht_(\d{4})_(\d+)$/);
+    if (!match) continue;
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
+      Object.entries(data.days || {}).forEach(([date, habits]) => {
+        Object.entries(habits).forEach(([habitId, done]) => {
+          if (done) logRows.push({ user_id: currentUser.id, date, habit_id: habitId, done: true });
+        });
+      });
+      Object.entries(data.weights || {}).forEach(([date, weight_kg]) => {
+        weightRows.push({ user_id: currentUser.id, date, weight_kg: parseFloat(weight_kg) });
+      });
+    } catch (e) {}
+  }
+
+  for (let i = 0; i < logRows.length; i += 500) {
+    await sb.from('habit_logs').upsert(logRows.slice(i, i + 500), { onConflict: 'user_id,date,habit_id' });
+  }
+  for (let i = 0; i < weightRows.length; i += 500) {
+    await sb.from('weight_logs').upsert(weightRows.slice(i, i + 500), { onConflict: 'user_id,date' });
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DATA LAYER (Supabase)
+// ═══════════════════════════════════════════════════════
+async function getHabits() {
+  if (habitsCache) return habitsCache;
+  const { data, error } = await sb.from('habits').select('*').order('sort_order');
+  if (error) { console.error(error); return JSON.parse(JSON.stringify(DEFAULT_HABITS)); }
+  habitsCache = (data || []).map(row => ({
+    id: row.id,
+    name: row.name,
+    icon: row.icon,
+    color: row.color,
+    weeklyTarget: row.weekly_target,
+    isLimit: row.is_limit,
+    isActive: row.is_active,
+  }));
+  return habitsCache;
+}
+
+async function saveHabits(habits) {
+  habitsCache = habits;
+  const rows = habits.map((h, i) => ({
+    id: h.id,
+    user_id: currentUser.id,
+    name: h.name,
+    icon: h.icon,
+    color: h.color,
+    weekly_target: h.weeklyTarget || 0,
+    is_limit: h.isLimit || false,
+    is_active: h.isActive !== false,
+    sort_order: i,
+  }));
+  const { error } = await sb.from('habits').upsert(rows, { onConflict: 'id,user_id' });
+  if (error) console.error('saveHabits:', error);
+}
+
+async function getMonthData(y, m) {
+  const key = `${y}_${m}`;
+  if (monthDataCache[key]) return monthDataCache[key];
+
+  const pad = n => String(n).padStart(2, '0');
+  const startDate = `${y}-${pad(m + 1)}-01`;
+  const endDate = `${y}-${pad(m + 1)}-${pad(daysInMonth(y, m))}`;
+
+  const [logsRes, weightsRes] = await Promise.all([
+    sb.from('habit_logs').select('date,habit_id,done').gte('date', startDate).lte('date', endDate),
+    sb.from('weight_logs').select('date,weight_kg').gte('date', startDate).lte('date', endDate),
+  ]);
+
+  const days = {};
+  (logsRes.data || []).forEach(row => {
+    if (!days[row.date]) days[row.date] = {};
+    if (row.done) days[row.date][row.habit_id] = true;
+  });
+
+  const weights = {};
+  (weightsRes.data || []).forEach(row => {
+    weights[row.date] = parseFloat(row.weight_kg);
+  });
+
+  monthDataCache[key] = { days, weights };
+  return monthDataCache[key];
+}
+
 // ═══════════════════════════════════════════════════════
 //  STATE & DEFAULTS
 // ═══════════════════════════════════════════════════════
 const DEFAULT_HABITS = [
-  { id: 'pilates',  name: 'Pilates',         icon: '🧘', color: '#f43f5e', weeklyTarget: 2, isLimit: false },
-  { id: 'zumba',   name: 'Zumba',            icon: '💃', color: '#f97316', weeklyTarget: 2, isLimit: false },
-  { id: 'hatha',   name: 'Hatha',            icon: '🧘', color: '#a855f7', weeklyTarget: 3, isLimit: false },
-  { id: 'walk',    name: 'Walk 40 Min',      icon: '🚶', color: '#3b82f6', weeklyTarget: 3, isLimit: false },
-  { id: 'food',    name: 'Outside Food',     icon: '🍔', color: '#ef4444', weeklyTarget: 2, isLimit: true  },
-  { id: 'sugar',   name: 'No Sugar',         icon: '🍬', color: '#22c55e', weeklyTarget: 6, isLimit: false },
-  { id: 'sugarday', name: 'Sugar Day',       icon: '🍰', color: '#f59e0b', weeklyTarget: 1, isLimit: true  },
-  { id: 'read',    name: 'Read',             icon: '📖', color: '#eab308', weeklyTarget: 0, isLimit: false },
-  { id: 'imf',     name: 'Intermittent Fast',icon: '⏳', color: '#06b6d4', weeklyTarget: 0, isLimit: false },
+  { id: 'pilates',  name: 'Pilates',          icon: '🧘', color: '#f43f5e', weeklyTarget: 2, isLimit: false },
+  { id: 'zumba',   name: 'Zumba',             icon: '💃', color: '#f97316', weeklyTarget: 2, isLimit: false },
+  { id: 'hatha',   name: 'Hatha',             icon: '🧘', color: '#a855f7', weeklyTarget: 3, isLimit: false },
+  { id: 'walk',    name: 'Walk 40 Min',       icon: '🚶', color: '#3b82f6', weeklyTarget: 3, isLimit: false },
+  { id: 'food',    name: 'Outside Food',      icon: '🍔', color: '#ef4444', weeklyTarget: 2, isLimit: true  },
+  { id: 'sugar',   name: 'No Sugar',          icon: '🍬', color: '#22c55e', weeklyTarget: 6, isLimit: false },
+  { id: 'sugarday',name: 'Sugar Day',         icon: '🍰', color: '#f59e0b', weeklyTarget: 1, isLimit: true  },
+  { id: 'read',    name: 'Read',              icon: '📖', color: '#eab308', weeklyTarget: 0, isLimit: false },
+  { id: 'imf',     name: 'Intermittent Fast', icon: '⏳', color: '#06b6d4', weeklyTarget: 0, isLimit: false },
 ];
 
 const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#6366f1','#a855f7','#ec4899','#14b8a6'];
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-let currentYear, currentMonth; // 0-indexed month
+let currentYear, currentMonth;
 let activeTab = 'today';
-let selectedDayStr = null; // null = today
-let activeWeekIndex = 0; // for weekly tab
+let selectedDayStr = null;
+let activeWeekIndex = 0;
 let selectedColor = COLORS[0];
-let weeklyCharts = {};
-let monthlyBarChart = null;
-
-// ── STORAGE ──
-function storageKey(y, m) { return `ht_${y}_${m}`; }
-
-function getMonthData(y, m) {
-  const key = storageKey(y, m);
-  const raw = localStorage.getItem(key);
-  if (raw) return JSON.parse(raw);
-  return { habits: null, days: {}, weights: {} };
-}
-
-function saveMonthData(y, m, data) {
-  localStorage.setItem(storageKey(y, m), JSON.stringify(data));
-}
-
-function getHabits() {
-  const raw = localStorage.getItem('ht_habits');
-  return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_HABITS));
-}
-
-function saveHabits(h) {
-  localStorage.setItem('ht_habits', JSON.stringify(h));
-}
-
-function getSettings() {
-  const raw = localStorage.getItem('ht_settings');
-  return raw ? JSON.parse(raw) : {};
-}
 
 // ── DATE HELPERS ──
 function toDateStr(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
 function today() { return toDateStr(new Date()); }
-
-function daysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
+function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 
 function getWeeksOfMonth(y, m) {
-  // Returns array of week objects: [{start: Date, end: Date, days: [Date,...]}]
   const weeks = [];
   const total = daysInMonth(y, m);
   let day = 1;
   while (day <= total) {
     const startDate = new Date(y, m, day);
-    const dow = startDate.getDay(); // 0=Sun
-    // Week starts on Sunday
-    const daysLeft = 7 - (weeks.length === 0 ? dow : 0);
+    const dow = startDate.getDay();
     const end = Math.min(day + (weeks.length === 0 ? 7 - dow - 1 : 6), total);
     const days = [];
     for (let d = day; d <= end; d++) days.push(new Date(y, m, d));
@@ -711,69 +947,54 @@ function getWeeksOfMonth(y, m) {
   return weeks;
 }
 
-function getCurrentWeekIndex(y, m, weeks) {
-  const t = today();
-  const [ty, tm, td] = t.split('-').map(Number);
-  if (ty !== y || tm - 1 !== m) return 0;
-  for (let i = 0; i < weeks.length; i++) {
-    const wDays = weeks[i].days.map(d => d.getDate());
-    if (wDays.includes(td)) return i;
-  }
-  return 0;
-}
-
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
-function init() {
+async function appInit() {
   const now = new Date();
   currentYear = now.getFullYear();
   currentMonth = now.getMonth();
   setupNav();
   renderMonthLabel();
-  renderTab(activeTab);
+  await renderTab(activeTab);
 }
 
 function setupNav() {
   document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       activeTab = btn.dataset.tab;
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.getElementById(`tab-${activeTab}`).classList.add('active');
-      renderTab(activeTab);
+      await renderTab(activeTab);
     });
   });
 
-  document.getElementById('prevMonth').addEventListener('click', () => {
+  document.getElementById('prevMonth').addEventListener('click', async () => {
     currentMonth--;
     if (currentMonth < 0) { currentMonth = 11; currentYear--; }
     renderMonthLabel();
     if (activeTab === 'today') {
-      // Jump selected day to last day of new month (or today if same month)
       const now = new Date();
-      if (currentYear === now.getFullYear() && currentMonth === now.getMonth()) {
-        selectedDayStr = today();
-      } else {
-        selectedDayStr = toDateStr(new Date(currentYear, currentMonth + 1, 0));
-      }
+      selectedDayStr = (currentYear === now.getFullYear() && currentMonth === now.getMonth())
+        ? today()
+        : toDateStr(new Date(currentYear, currentMonth + 1, 0));
     }
-    renderTab(activeTab);
+    await renderTab(activeTab);
   });
-  document.getElementById('nextMonth').addEventListener('click', () => {
+
+  document.getElementById('nextMonth').addEventListener('click', async () => {
     currentMonth++;
     if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     renderMonthLabel();
     if (activeTab === 'today') {
       const now = new Date();
-      if (currentYear === now.getFullYear() && currentMonth === now.getMonth()) {
-        selectedDayStr = today();
-      } else {
-        selectedDayStr = toDateStr(new Date(currentYear, currentMonth, 1));
-      }
+      selectedDayStr = (currentYear === now.getFullYear() && currentMonth === now.getMonth())
+        ? today()
+        : toDateStr(new Date(currentYear, currentMonth, 1));
     }
-    renderTab(activeTab);
+    await renderTab(activeTab);
   });
 }
 
@@ -781,42 +1002,39 @@ function renderMonthLabel() {
   document.getElementById('monthLabel').textContent = `${MONTH_NAMES[currentMonth].slice(0,3)} ${currentYear}`;
 }
 
-function renderTab(tab) {
-  if (tab === 'today') renderToday();
-  else if (tab === 'weekly') renderWeekly();
-  else if (tab === 'monthly') renderMonthly();
-  else if (tab === 'settings') renderSettings();
+async function renderTab(tab) {
+  if (tab === 'today') await renderToday();
+  else if (tab === 'weekly') await renderWeekly();
+  else if (tab === 'monthly') await renderMonthly();
+  else if (tab === 'settings') await renderSettings();
 }
 
 // ═══════════════════════════════════════════════════════
 //  TODAY TAB
 // ═══════════════════════════════════════════════════════
-function renderToday() {
+async function renderToday() {
   const container = document.getElementById('tab-today');
-  const habits = getHabits();
+  const habits = await getHabits();
 
-  // Resolve which day we're viewing
   const todayReal = today();
   if (!selectedDayStr) selectedDayStr = todayReal;
 
-  // Parse selected day to get year/month for data lookup
   const [selY, selM, selD] = selectedDayStr.split('-').map(Number);
   const selMonth = selM - 1;
-  const data = getMonthData(selY, selMonth);
+  const data = await getMonthData(selY, selMonth);
   const dayData = data.days[selectedDayStr] || {};
   const isToday = selectedDayStr === todayReal;
 
-  // Display date
   const displayDate = new Date(selY, selMonth, selD);
   const dayName = DAY_NAMES[displayDate.getDay()];
-  const fullDate = displayDate.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  const fullDate = displayDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-  // Week info for the selected day's month
   const weeks = getWeeksOfMonth(selY, selMonth);
   let weekIdx = 0;
   for (let i = 0; i < weeks.length; i++) {
     if (weeks[i].days.some(d => toDateStr(d) === selectedDayStr)) { weekIdx = i; break; }
   }
+
   const foodHabit = habits.find(h => h.id === 'food');
   const foodLimit = foodHabit ? foodHabit.weeklyTarget : 2;
   const foodCount = countWeekHabitDone(data, weeks[weekIdx]?.days || [], 'food');
@@ -824,21 +1042,15 @@ function renderToday() {
   const sugarDayLimit = sugarDayHabit ? sugarDayHabit.weeklyTarget : 1;
   const sugarDayCount = countWeekHabitDone(data, weeks[weekIdx]?.days || [], 'sugarday');
 
-  // Done count
   const trackableHabits = habits.filter(h => !h.isLimit);
   const doneToday = trackableHabits.filter(h => dayData[h.id]).length;
   const totalTrackable = trackableHabits.length;
   const pct = totalTrackable > 0 ? Math.round(doneToday / totalTrackable * 100) : 0;
 
-  // Prev/next day
-  const prevDay = new Date(selY, selMonth, selD - 1);
-  const nextDay = new Date(selY, selMonth, selD + 1);
-  const nextDayStr = toDateStr(nextDay);
-  const canGoNext = nextDayStr <= todayReal;
+  const canGoNext = toDateStr(new Date(selY, selMonth, selD + 1)) <= todayReal;
 
   let html = '';
 
-  // Date banner with day nav
   html += `<div class="date-banner" style="padding-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <button onclick="changeDay(-1)" style="background:#ffffff18;border:none;color:#a5b4fc;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:18px;">‹</button>
@@ -852,13 +1064,11 @@ function renderToday() {
     ${!isToday ? `<div style="margin-top:6px;"><button onclick="goToToday()" style="background:#7c3aed33;border:1px solid #7c3aed55;color:#a5b4fc;padding:4px 12px;border-radius:99px;font-size:12px;cursor:pointer;">↩ Go to Today</button></div>` : ''}
   </div>`;
 
-  // Progress
   html += `<div class="today-progress">
     <div class="prog-row"><span>${isToday ? "Today's" : "Day's"} Progress</span><span>${doneToday}/${totalTrackable} habits &mdash; ${pct}%</span></div>
     <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
   </div>`;
 
-  // Warnings
   if (foodCount >= foodLimit && foodLimit > 0) {
     html += `<div class="food-warning">⚠️ Outside food limit reached this week! (${foodCount}/${foodLimit} days)</div>`;
   } else if (foodCount === foodLimit - 1 && foodLimit > 0) {
@@ -868,15 +1078,13 @@ function renderToday() {
     html += `<div class="food-warning" style="background:linear-gradient(135deg,#713f12,#854d0e);border-color:#f59e0b;">⚠️ Sugar day limit reached this week! (${sugarDayCount}/${sugarDayLimit} day)</div>`;
   }
 
-  // Habits
   html += `<div class="section-label">Habits</div>`;
   habits.filter(h => !h.isLimit).forEach(habit => {
     const done = !!dayData[habit.id];
     const wDays = weeks[weekIdx]?.days || [];
     const weekDone = countWeekHabitDone(data, wDays, habit.id);
-    const weekTarget = habit.weeklyTarget;
-    const sub = weekTarget > 0 ? `${weekDone}/${weekTarget} this week` : `${weekDone} this week`;
-    html += `<div class="habit-card ${done ? 'done' : ''}" style="--habit-color:${habit.color}" data-id="${habit.id}" onclick="toggleHabit('${habit.id}')">
+    const sub = habit.weeklyTarget > 0 ? `${weekDone}/${habit.weeklyTarget} this week` : `${weekDone} this week`;
+    html += `<div class="habit-card ${done ? 'done' : ''}" style="--habit-color:${habit.color}" onclick="toggleHabit('${habit.id}')">
       <div class="habit-icon">${habit.icon}</div>
       <div class="habit-info">
         <div class="habit-name">${habit.name}</div>
@@ -886,11 +1094,10 @@ function renderToday() {
     </div>`;
   });
 
-  // Cheat tracker section
   html += `<div class="section-label">Cheat Tracker</div>`;
   if (foodHabit) {
     const flagged = !!dayData['food'];
-    html += `<div class="habit-card ${flagged ? 'flagged' : ''}" style="--habit-color:${foodHabit.color}" data-id="food" onclick="toggleHabit('food')">
+    html += `<div class="habit-card ${flagged ? 'flagged' : ''}" style="--habit-color:${foodHabit.color}" onclick="toggleHabit('food')">
       <div class="habit-icon">🍔</div>
       <div class="habit-info">
         <div class="habit-name">Outside Food</div>
@@ -901,7 +1108,7 @@ function renderToday() {
   }
   if (sugarDayHabit) {
     const flagged = !!dayData['sugarday'];
-    html += `<div class="habit-card ${flagged ? 'flagged' : ''}" style="--habit-color:${sugarDayHabit.color}" data-id="sugarday" onclick="toggleHabit('sugarday')">
+    html += `<div class="habit-card ${flagged ? 'flagged' : ''}" style="--habit-color:${sugarDayHabit.color}" onclick="toggleHabit('sugarday')">
       <div class="habit-icon">🍰</div>
       <div class="habit-info">
         <div class="habit-name">Sugar Day</div>
@@ -911,7 +1118,6 @@ function renderToday() {
     </div>`;
   }
 
-  // Weight
   html += `<div class="section-label">Weight</div>`;
   html += `<div class="weight-card">
     <div class="weight-icon">⚖️</div>
@@ -925,48 +1131,64 @@ function renderToday() {
   container.innerHTML = html;
 }
 
-function toggleHabit(id) {
+async function toggleHabit(id) {
   const [y, m] = selectedDayStr.split('-').map(Number);
-  const data = getMonthData(y, m - 1);
+  const data = await getMonthData(y, m - 1);
   if (!data.days[selectedDayStr]) data.days[selectedDayStr] = {};
-  data.days[selectedDayStr][id] = !data.days[selectedDayStr][id];
-  saveMonthData(y, m - 1, data);
-  renderToday();
+  const newVal = !data.days[selectedDayStr][id];
+  data.days[selectedDayStr][id] = newVal;
+
+  const { error } = await sb.from('habit_logs').upsert({
+    user_id: currentUser.id,
+    date: selectedDayStr,
+    habit_id: id,
+    done: newVal,
+  }, { onConflict: 'user_id,date,habit_id' });
+  if (error) console.error('toggleHabit:', error);
+
+  await renderToday();
 }
 
-function saveWeight(val) {
+async function saveWeight(val) {
   const [y, m] = selectedDayStr.split('-').map(Number);
-  const data = getMonthData(y, m - 1);
+  const data = await getMonthData(y, m - 1);
   const num = parseFloat(val);
+
   if (!isNaN(num) && num > 0) {
     data.weights[selectedDayStr] = num;
+    await sb.from('weight_logs').upsert({
+      user_id: currentUser.id,
+      date: selectedDayStr,
+      weight_kg: num,
+    }, { onConflict: 'user_id,date' });
   } else {
     delete data.weights[selectedDayStr];
+    await sb.from('weight_logs').delete()
+      .eq('user_id', currentUser.id)
+      .eq('date', selectedDayStr);
   }
-  saveMonthData(y, m - 1, data);
 }
 
-function changeDay(dir) {
+async function changeDay(dir) {
   if (!selectedDayStr) selectedDayStr = today();
   const [y, m, d] = selectedDayStr.split('-').map(Number);
   const next = new Date(y, m - 1, d + dir);
   const nextStr = toDateStr(next);
-  if (nextStr > today()) return; // can't go to future
+  if (nextStr > today()) return;
   selectedDayStr = nextStr;
-  // sync month nav to selected day's month
   currentYear = next.getFullYear();
   currentMonth = next.getMonth();
   renderMonthLabel();
-  renderToday();
+  await renderToday();
 }
 
-function goToToday() {
+async function goToToday() {
   selectedDayStr = today();
   const now = new Date();
   currentYear = now.getFullYear();
   currentMonth = now.getMonth();
   renderMonthLabel();
-  renderToday();
+  await renderToday();
 }
 
 function countWeekHabitDone(data, wDays, habitId) {
@@ -979,15 +1201,14 @@ function countWeekHabitDone(data, wDays, habitId) {
 // ═══════════════════════════════════════════════════════
 //  WEEKLY TAB
 // ═══════════════════════════════════════════════════════
-function renderWeekly() {
+async function renderWeekly() {
   const container = document.getElementById('tab-weekly');
-  const habits = getHabits();
-  const data = getMonthData(currentYear, currentMonth);
+  const habits = await getHabits();
+  const data = await getMonthData(currentYear, currentMonth);
   const weeks = getWeeksOfMonth(currentYear, currentMonth);
 
   if (activeWeekIndex >= weeks.length) activeWeekIndex = weeks.length - 1;
 
-  // Week selector
   let html = `<div class="week-selector">`;
   weeks.forEach((w, i) => {
     html += `<button class="week-btn ${i === activeWeekIndex ? 'active' : ''}" onclick="selectWeek(${i})">Week ${i+1}</button>`;
@@ -996,15 +1217,10 @@ function renderWeekly() {
 
   const week = weeks[activeWeekIndex];
   const wDays = week.days;
-
-  // Date range label
   const rangeLabel = `${wDays[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${wDays[wDays.length-1].toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
   html += `<div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">${rangeLabel}</div>`;
 
-  // Donut charts grid
   html += `<div class="week-overview">`;
-
-  // Overall donut
   const trackable = habits.filter(h => !h.isLimit);
   const totalTarget = trackable.reduce((s,h) => s + (h.weeklyTarget || 0), 0);
   const totalDone = trackable.reduce((s,h) => s + countWeekHabitDone(data, wDays, h.id), 0);
@@ -1015,7 +1231,6 @@ function renderWeekly() {
     <div style="font-size:13px;color:var(--text-muted);margin-top:8px;">${totalDone} done · ${totalRemain} remaining</div>
   </div>`;
 
-  // Per-habit donuts (only for habits with targets)
   trackable.filter(h => h.weeklyTarget > 0).forEach(h => {
     const done = countWeekHabitDone(data, wDays, h.id);
     const remain = Math.max(0, h.weeklyTarget - done);
@@ -1027,16 +1242,11 @@ function renderWeekly() {
   });
   html += `</div>`;
 
-  // Week grid
-  html += `<div class="week-grid">`;
-  // Header
-  html += `<div class="week-grid-header"><div>Habit</div>`;
+  html += `<div class="week-grid"><div class="week-grid-header"><div>Habit</div>`;
   wDays.forEach(d => { html += `<div>${DAY_NAMES[d.getDay()]}<br><span style="color:var(--text)">${d.getDate()}</span></div>`; });
-  // Fill remaining cols if week < 7 days
   for (let i = wDays.length; i < 7; i++) html += `<div></div>`;
   html += `</div>`;
 
-  // Rows
   habits.forEach(h => {
     html += `<div class="week-grid-row">`;
     html += `<div class="habit-cell-name" style="color:${h.color}">${h.icon} <span style="color:var(--text)">${h.name}</span></div>`;
@@ -1053,12 +1263,8 @@ function renderWeekly() {
 
   container.innerHTML = html;
 
-  // Render charts after DOM update
   requestAnimationFrame(() => {
-    // Overall
     renderDonut('donut-overall', totalDone, totalRemain, ['#7c3aed','#2a2a4a'], `${totalDone}`);
-
-    // Per habit
     trackable.filter(h => h.weeklyTarget > 0).forEach(h => {
       const done = countWeekHabitDone(data, wDays, h.id);
       const remain = Math.max(0, h.weeklyTarget - done);
@@ -1072,7 +1278,6 @@ function renderDonut(canvasId, done, remain, colors, centerText) {
   if (!canvas) return;
   const existing = Chart.getChart(canvas);
   if (existing) existing.destroy();
-
   const total = done + remain;
   new Chart(canvas, {
     type: 'doughnut',
@@ -1086,10 +1291,7 @@ function renderDonut(canvasId, done, remain, colors, centerText) {
     },
     options: {
       cutout: '72%',
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-      },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
       animation: { duration: 600 },
     },
     plugins: [{
@@ -1109,22 +1311,21 @@ function renderDonut(canvasId, done, remain, colors, centerText) {
   });
 }
 
-function selectWeek(i) {
+async function selectWeek(i) {
   activeWeekIndex = i;
-  renderWeekly();
+  await renderWeekly();
 }
 
 // ═══════════════════════════════════════════════════════
 //  MONTHLY TAB
 // ═══════════════════════════════════════════════════════
-function renderMonthly() {
+async function renderMonthly() {
   const container = document.getElementById('tab-monthly');
-  const habits = getHabits();
-  const data = getMonthData(currentYear, currentMonth);
+  const habits = await getHabits();
+  const data = await getMonthData(currentYear, currentMonth);
   const weeks = getWeeksOfMonth(currentYear, currentMonth);
   const total = daysInMonth(currentYear, currentMonth);
 
-  // Compute per-habit monthly totals
   const habitTotals = {};
   habits.forEach(h => { habitTotals[h.id] = 0; });
   for (let d = 1; d <= total; d++) {
@@ -1133,14 +1334,12 @@ function renderMonthly() {
     habits.forEach(h => { if (day[h.id]) habitTotals[h.id]++; });
   }
 
-  // Per-week counts
   const weekCounts = weeks.map(w => {
     const wc = {};
     habits.forEach(h => { wc[h.id] = countWeekHabitDone(data, w.days, h.id); });
     return wc;
   });
 
-  // Weight
   const weightEntries = Object.entries(data.weights).filter(([ds]) => {
     const [y,m] = ds.split('-').map(Number);
     return y === currentYear && m - 1 === currentMonth;
@@ -1149,10 +1348,7 @@ function renderMonthly() {
   const endWeight = weightEntries.length > 0 ? weightEntries[weightEntries.length-1][1] : null;
   const weightChange = startWeight && endWeight ? (endWeight - startWeight).toFixed(1) : null;
 
-  let html = '';
-
-  // Weight cards
-  html += `<div class="monthly-cards">
+  let html = `<div class="monthly-cards">
     <div class="stat-card">
       <div class="stat-val">${startWeight ?? '—'}</div>
       <div class="stat-label">Start Weight (kg)</div>
@@ -1164,13 +1360,11 @@ function renderMonthly() {
     </div>
   </div>`;
 
-  // Bar chart
   html += `<div class="chart-card">
     <h3>Monthly Progress vs Target</h3>
     <canvas id="monthly-bar"></canvas>
   </div>`;
 
-  // Goals table
   html += `<div class="goals-table"><div class="goals-table-inner">
     <div class="goals-table-header">
       <div>Habit</div><div>Target</div><div>Actual</div>
@@ -1192,7 +1386,6 @@ function renderMonthly() {
   });
   html += `</div></div>`;
 
-  // Cheat day log
   const cheatDays = [];
   for (let d = 1; d <= total; d++) {
     const ds = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -1208,17 +1401,14 @@ function renderMonthly() {
     ${cheatDays.map(cd => {
       const dateObj = new Date(cd.ds + 'T00:00:00');
       const dateLabel = dateObj.toLocaleDateString('en-US',{month:'short',day:'numeric',weekday:'short'});
-      if (cd.type === 'food') {
-        return `<div class="cheat-day-item"><span class="cheat-badge food">🍔 Outside Food</span><span>${dateLabel}</span></div>`;
-      } else {
-        return `<div class="cheat-day-item"><span class="cheat-badge sugar">🍰 Sugar Day</span><span>${dateLabel}</span></div>`;
-      }
+      return cd.type === 'food'
+        ? `<div class="cheat-day-item"><span class="cheat-badge food">🍔 Outside Food</span><span>${dateLabel}</span></div>`
+        : `<div class="cheat-day-item"><span class="cheat-badge sugar">🍰 Sugar Day</span><span>${dateLabel}</span></div>`;
     }).join('')}
   </div>`;
 
   container.innerHTML = html;
 
-  // Render bar chart
   requestAnimationFrame(() => {
     const canvas = document.getElementById('monthly-bar');
     if (!canvas) return;
@@ -1226,41 +1416,19 @@ function renderMonthly() {
     if (ex) ex.destroy();
 
     const trackable = habits.filter(h => h.weeklyTarget > 0);
-    const labels = trackable.map(h => `${h.icon} ${h.name}`);
-    const targets = trackable.map(h => h.weeklyTarget * weeks.length);
-    const actuals = trackable.map(h => habitTotals[h.id]);
-
     new Chart(canvas, {
       type: 'bar',
       data: {
-        labels,
+        labels: trackable.map(h => `${h.icon} ${h.name}`),
         datasets: [
-          {
-            label: 'Target',
-            data: targets,
-            backgroundColor: '#2a2a6a',
-            borderColor: '#4a4aa0',
-            borderWidth: 1,
-            borderRadius: 4,
-          },
-          {
-            label: 'Actual',
-            data: actuals,
-            backgroundColor: trackable.map(h => h.color + 'cc'),
-            borderColor: trackable.map(h => h.color),
-            borderWidth: 1,
-            borderRadius: 4,
-          }
+          { label: 'Target', data: trackable.map(h => h.weeklyTarget * weeks.length), backgroundColor: '#2a2a6a', borderColor: '#4a4aa0', borderWidth: 1, borderRadius: 4 },
+          { label: 'Actual', data: trackable.map(h => habitTotals[h.id]), backgroundColor: trackable.map(h => h.color + 'cc'), borderColor: trackable.map(h => h.color), borderWidth: 1, borderRadius: 4 }
         ]
       },
       options: {
         indexAxis: 'y',
         responsive: true,
-        plugins: {
-          legend: {
-            labels: { color: '#e8e8f0', font: { size: 11 } }
-          }
-        },
+        plugins: { legend: { labels: { color: '#e8e8f0', font: { size: 11 } } } },
         scales: {
           x: { ticks: { color: '#7a7a9a' }, grid: { color: '#2a2a4a' } },
           y: { ticks: { color: '#e8e8f0', font: { size: 11 } }, grid: { color: '#2a2a4a' } }
@@ -1273,14 +1441,11 @@ function renderMonthly() {
 // ═══════════════════════════════════════════════════════
 //  SETTINGS TAB
 // ═══════════════════════════════════════════════════════
-function renderSettings() {
+async function renderSettings() {
   const container = document.getElementById('tab-settings');
-  const habits = getHabits();
+  const habits = await getHabits();
 
-  let html = '';
-
-  // Habit list
-  html += `<div class="settings-section">
+  let html = `<div class="settings-section">
     <div class="settings-section-title">Your Habits</div>`;
   habits.forEach((h, i) => {
     html += `<div class="habit-settings-row">
@@ -1295,7 +1460,6 @@ function renderSettings() {
   });
   html += `</div>`;
 
-  // Add new habit
   html += `<div class="settings-section">
     <div class="settings-section-title">Add New Habit</div>
     <div class="add-habit-form">
@@ -1318,7 +1482,17 @@ function renderSettings() {
     </div>
   </div>`;
 
-  // Danger zone
+  html += `<div class="settings-section">
+    <div class="settings-section-title">Account</div>
+    <div class="settings-row">
+      <div>
+        <label>Signed in as</label>
+        <div class="sub">${currentUser?.email || ''}</div>
+      </div>
+      <button onclick="signOut()" style="background:#2a2a4a;border:none;color:var(--text-muted);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;">Sign Out</button>
+    </div>
+  </div>`;
+
   html += `<div class="settings-section">
     <div class="settings-section-title">Data</div>
     <div class="settings-row">
@@ -1340,49 +1514,91 @@ function pickColor(c) {
   });
 }
 
-function updateTarget(idx, val) {
-  const habits = getHabits();
+async function updateTarget(idx, val) {
+  const habits = await getHabits();
   habits[idx].weeklyTarget = parseInt(val) || 0;
-  saveHabits(habits);
+  await saveHabits(habits);
 }
 
-function deleteHabit(idx) {
-  if (!confirm('Delete this habit? Its data will remain but won\'t show in the tracker.')) return;
-  const habits = getHabits();
-  habits.splice(idx, 1);
-  saveHabits(habits);
-  renderSettings();
+async function deleteHabit(idx) {
+  if (!confirm("Delete this habit? Its logged data will remain but it won't show in the tracker.")) return;
+  const habits = await getHabits();
+  const [removed] = habits.splice(idx, 1);
+  await Promise.all([
+    saveHabits(habits),
+    sb.from('habits').delete().eq('id', removed.id).eq('user_id', currentUser.id),
+  ]);
+  await renderSettings();
 }
 
-function addHabit() {
+async function addHabit() {
   const name = document.getElementById('newHabitName').value.trim();
   const icon = document.getElementById('newHabitIcon').value.trim() || '⭐';
   const target = parseInt(document.getElementById('newHabitTarget').value) || 0;
   const isLimit = document.getElementById('newHabitIsLimit').checked;
   if (!name) { alert('Please enter a habit name.'); return; }
 
-  const habits = getHabits();
+  const habits = await getHabits();
   const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
   habits.push({ id, name, icon, color: selectedColor, weeklyTarget: target, isLimit });
-  saveHabits(habits);
-  renderSettings();
-  // Reset form
+  await saveHabits(habits);
+  await renderSettings();
+
   document.getElementById('newHabitName').value = '';
   document.getElementById('newHabitIcon').value = '';
   document.getElementById('newHabitTarget').value = '';
   document.getElementById('newHabitIsLimit').checked = false;
 }
 
-function resetMonth() {
+async function resetMonth() {
   if (!confirm(`Reset ALL data for ${MONTH_NAMES[currentMonth]} ${currentYear}? This cannot be undone.`)) return;
-  localStorage.removeItem(storageKey(currentYear, currentMonth));
-  renderTab(activeTab);
+
+  const pad = n => String(n).padStart(2, '0');
+  const startDate = `${currentYear}-${pad(currentMonth+1)}-01`;
+  const endDate = `${currentYear}-${pad(currentMonth+1)}-${pad(daysInMonth(currentYear, currentMonth))}`;
+
+  await Promise.all([
+    sb.from('habit_logs').delete().eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate),
+    sb.from('weight_logs').delete().eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate),
+  ]);
+
+  delete monthDataCache[`${currentYear}_${currentMonth}`];
+  await renderTab(activeTab);
 }
 
 // ═══════════════════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════════════════
-init();
+(async () => {
+  showLoading();
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await migrateFromLocalStorage();
+    showApp();
+    await appInit();
+  } else {
+    showAuthOverlay();
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && !currentUser) {
+      currentUser = session.user;
+      habitsCache = null;
+      monthDataCache = {};
+      showLoading();
+      await migrateFromLocalStorage();
+      showApp();
+      await appInit();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      habitsCache = null;
+      monthDataCache = {};
+      showAuthOverlay();
+    }
+  });
+})();
 </script>
 </body>
 </html>
